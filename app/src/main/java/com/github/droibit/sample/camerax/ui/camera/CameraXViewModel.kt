@@ -29,7 +29,7 @@ import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
 sealed class TakePictureResult {
-    data class Success(val uri: Uri) : TakePictureResult()
+    object Success : TakePictureResult()
     object Failure : TakePictureResult()
 }
 
@@ -41,7 +41,10 @@ class CameraXViewModel @ViewModelInject constructor(
 ) : AndroidViewModel(context as Application) {
 
     private val takePictureResultLiveData = MutableLiveData<Event<TakePictureResult>>()
-    val takePictureResult: LiveData<Event<TakePictureResult>> = takePictureResultLiveData
+    val takePictureResult: LiveData<Event<TakePictureResult>> get() = takePictureResultLiveData
+
+    private val navigateToGalleryLiveData = MutableLiveData<Event<List<Uri>>>()
+    val navigateToGallery: LiveData<Event<List<Uri>>> get() = navigateToGalleryLiveData
 
     private var imageCapture: ImageCapture? = null
 
@@ -62,7 +65,7 @@ class CameraXViewModel @ViewModelInject constructor(
     }
 
     @UiThread
-    fun takePicture() {
+    fun takePhoto() {
         if (captureJob?.isActive == true) {
             return
         }
@@ -70,7 +73,10 @@ class CameraXViewModel @ViewModelInject constructor(
         captureJob = viewModelScope.launch {
             imageCapture?.let { imageCapture ->
                 // Create output file to hold the image
-                val photoFile = createFile()
+                val photoFile = File(
+                    outputDirectory,
+                    SimpleDateFormat(FILENAME, Locale.US).format(System.currentTimeMillis()) + ".jpg"
+                )
                 // Setup image capture metadata
                 val metadata = ImageCapture.Metadata()
 
@@ -80,9 +86,10 @@ class CameraXViewModel @ViewModelInject constructor(
                     .build()
 
                 val result = try {
-                    val output = imageCapture.takePicture(outputOptions)
+                    val output = imageCapture.takePhoto(outputOptions)
                     val savedUri = output.savedUri ?: Uri.fromFile(photoFile)
-                    TakePictureResult.Success(savedUri)
+                    Timber.d("Saved photo: $savedUri")
+                    TakePictureResult.Success
                 } catch (e: ImageCaptureException) {
                     Timber.e(e, "Photo capture failed: ${e.message}")
                     TakePictureResult.Failure
@@ -92,7 +99,7 @@ class CameraXViewModel @ViewModelInject constructor(
         }
     }
 
-    private suspend fun ImageCapture.takePicture(outputFileOptions: ImageCapture.OutputFileOptions): ImageCapture.OutputFileResults {
+    private suspend fun ImageCapture.takePhoto(outputFileOptions: ImageCapture.OutputFileOptions): ImageCapture.OutputFileResults {
         return suspendCoroutine { cont ->
             takePicture(
                 outputFileOptions,
@@ -110,11 +117,16 @@ class CameraXViewModel @ViewModelInject constructor(
         }
     }
 
-    private fun createFile(): File {
-        return File(
-            outputDirectory, SimpleDateFormat(FILENAME, Locale.US)
-                .format(System.currentTimeMillis()) + "jpg"
-        )
+    @UiThread
+    fun onGalleryButtonClick() {
+        if (captureJob?.isActive == true) {
+            return
+        }
+
+        val photos = outputDirectory.listFiles { file: File ->
+            file.isFile && file.extension.equals("jpg", ignoreCase = false)
+        }?.map { Uri.fromFile(it) } ?: emptyList()
+        navigateToGalleryLiveData.value = Event(photos)
     }
 }
 

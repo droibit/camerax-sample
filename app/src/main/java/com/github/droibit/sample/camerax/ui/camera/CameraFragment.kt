@@ -1,7 +1,5 @@
 package com.github.droibit.sample.camerax.ui.camera
 
-import android.content.ActivityNotFoundException
-import android.content.Intent
 import android.os.Bundle
 import android.util.DisplayMetrics
 import android.view.View
@@ -12,7 +10,9 @@ import androidx.core.view.doOnAttach
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.observe
+import androidx.navigation.fragment.findNavController
 import com.github.droibit.sample.camerax.R
+import com.github.droibit.sample.camerax.ui.camera.CameraFragmentDirections.Companion.toGalleryFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_camera.*
 import timber.log.Timber
@@ -41,24 +41,36 @@ class CameraFragment : Fragment(R.layout.fragment_camera) {
             event.consume()?.let { result ->
                 when(result) {
                     is TakePictureResult.Success -> {
-                        try {
-                            val intent = Intent(Intent.ACTION_VIEW)
-                                .setDataAndType(result.uri, "image/*")
-                            requireActivity().startActivity(intent)
-                        } catch (e: ActivityNotFoundException) {
-                            // Ignore
-                        }
+                        showShortToast("The photo was taken.")
                     }
                     is TakePictureResult.Failure -> {
-                        Toast.makeText(requireContext(), "Failed to take a picture.", Toast.LENGTH_SHORT).show()
+                        showShortToast("Failed to take a photo.")
                     }
                 }
             }
         }
 
         camera_capture_button.setOnClickListener {
-            cameraViewModel.takePicture()
+            cameraViewModel.takePhoto()
         }
+
+        cameraViewModel.navigateToGallery.observe(viewLifecycleOwner) {
+            it.consume()?.let { photoUris ->
+                if (photoUris.isEmpty()) {
+                    showShortToast("There are no photos.")
+                } else {
+                    findNavController().navigate(toGalleryFragment(photoUris.toTypedArray()))
+                }
+            }
+        }
+
+        gallery_button.setOnClickListener {
+            cameraViewModel.onGalleryButtonClick()
+        }
+    }
+
+    private fun showShortToast(message: String) {
+        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
 
     private fun bindCameraUseCases(cameraProvider: ProcessCameraProvider) {

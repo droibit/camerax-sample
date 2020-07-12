@@ -27,5 +27,16 @@
             app:destination="@id/permissionsFragment"
             app:popUpTo="@id/cameraFragment"
             app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/toGalleryFragment"
+            app:destination="@id/galleryFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/galleryFragment"
+        android:name="com.github.droibit.sample.camerax.ui.gallery.GalleryFragment"
+        android:label="GalleryFragment" >
+        <argument
+            android:name="photoUris"
+            app:argType="android.net.Uri[]" />
     </fragment>
 </navigation>

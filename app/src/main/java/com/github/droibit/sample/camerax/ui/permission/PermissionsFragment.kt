@@ -16,6 +16,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.github.droibit.sample.camerax.R
+import com.github.droibit.sample.camerax.ui.permission.PermissionsFragmentDirections.Companion.toCameraFragment
 
 class PermissionsFragment : Fragment() {
 
@@ -33,7 +34,7 @@ class PermissionsFragment : Fragment() {
 
         lifecycleScope.launchWhenCreated {
             if (checkCameraPermissionGranted()) {
-                findNavController().navigate(R.id.toCameraFragment)
+                findNavController().navigate(toCameraFragment())
             } else {
                 requestPermissionLauncher.launch(Manifest.permission.CAMERA)
             }

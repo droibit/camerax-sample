@@ -5,6 +5,7 @@ plugins {
   kotlin("android")
   kotlin("kapt")
   id("kotlin-android-extensions")
+  id("androidx.navigation.safeargs.kotlin")
   id("dagger.hilt.android.plugin")
 }
 
@@ -49,6 +50,7 @@ dependencies {
   implementation("androidx.fragment:fragment-ktx:1.3.0-alpha06")
   implementation("androidx.appcompat:appcompat:1.1.0")
   implementation("androidx.constraintlayout:constraintlayout:1.1.3")
+  implementation("androidx.viewpager2:viewpager2:1.0.0")
 
   val cameraxVersion = "1.0.0-beta06"
   implementation("androidx.camera:camera-core:$cameraxVersion")
@@ -60,7 +62,7 @@ dependencies {
   implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
   implementation("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion")
 
-  val navigationVersion = "2.3.0"
+  val navigationVersion: String by project
   implementation("androidx.navigation:navigation-fragment-ktx:$navigationVersion")
 
   val daggerVersion: String by project
@@ -70,6 +72,8 @@ dependencies {
   val hiltVersion = "1.0.0-alpha01"
   implementation("androidx.hilt:hilt-lifecycle-viewmodel:$hiltVersion")
   kapt("androidx.hilt:hilt-compiler:$hiltVersion")
+
+  implementation("io.coil-kt:coil:0.11.0")
 
   implementation("com.jakewharton.timber:timber:4.7.1")
 
