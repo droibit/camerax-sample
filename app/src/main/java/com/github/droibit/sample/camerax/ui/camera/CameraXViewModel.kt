@@ -22,6 +22,7 @@ import timber.log.Timber
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.CancellationException
 import javax.inject.Named
 import kotlin.LazyThreadSafetyMode.NONE
 import kotlin.coroutines.resume
@@ -75,7 +76,10 @@ class CameraXViewModel @ViewModelInject constructor(
                 // Create output file to hold the image
                 val photoFile = File(
                     outputDirectory,
-                    SimpleDateFormat(FILENAME, Locale.US).format(System.currentTimeMillis()) + ".jpg"
+                    SimpleDateFormat(
+                        FILENAME,
+                        Locale.US
+                    ).format(System.currentTimeMillis()) + ".jpg"
                 )
                 // Setup image capture metadata
                 val metadata = ImageCapture.Metadata()
@@ -142,7 +146,11 @@ private suspend fun ProcessCameraProvider(context: Context): ProcessCameraProvid
                     cont.resume(cameraProviderFuture.get())
                 }
             } catch (e: Exception) {
-                cont.resumeWithException(e)
+                if (e is InterruptedException || e is CancellationException) {
+                    cont.cancel(e)
+                } else {
+                    cont.resumeWithException(e)
+                }
             }
         }, ContextCompat.getMainExecutor(context))
 

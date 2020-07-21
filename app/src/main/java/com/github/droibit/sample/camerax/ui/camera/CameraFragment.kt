@@ -1,12 +1,10 @@
 package com.github.droibit.sample.camerax.ui.camera
 
 import android.os.Bundle
-import android.util.DisplayMetrics
 import android.view.View
 import android.widget.Toast
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.core.view.doOnAttach
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.observe
@@ -32,9 +30,7 @@ class CameraFragment : Fragment(R.layout.fragment_camera) {
         super.onViewCreated(view, savedInstanceState)
 
         cameraViewModel.processCameraProvider.observe(viewLifecycleOwner) { cameraProvider ->
-            view_finder.doOnAttach {
-                bindCameraUseCases(cameraProvider)
-            }
+            bindCameraUseCases(cameraProvider)
         }
 
         cameraViewModel.takePictureResult.observe(viewLifecycleOwner) { event ->
@@ -78,17 +74,18 @@ class CameraFragment : Fragment(R.layout.fragment_camera) {
             .requireLensFacing(CameraSelector.LENS_FACING_BACK)
             .build()
 
-        // Get screen metrics used to setup camera for full screen resolution
-        val metrics = DisplayMetrics().also { view_finder.display.getRealMetrics(it) }
-        Timber.d("Screen metrics: ${metrics.widthPixels} x ${metrics.heightPixels}")
+//        // Get screen metrics used to setup camera for full screen resolution
+//        val metrics = DisplayMetrics().also { view_finder.display.getRealMetrics(it) }
+//        Timber.d("Screen metrics: ${metrics.widthPixels} x ${metrics.heightPixels}")
+//        val screenAspectRatio = aspectRatio(metrics.widthPixels, metrics.heightPixels)
 
-        val screenAspectRatio = aspectRatio(metrics.widthPixels, metrics.heightPixels)
-        Timber.d("Preview aspect ratio: $screenAspectRatio")
+        val previewAspectRatio = aspectRatio(view_finder.width, view_finder.height)
+        Timber.d("Preview aspect ratio: $previewAspectRatio(${view_finder.width} x ${view_finder.height})")
 
         val rotation = view_finder.display.rotation
         val preview = Preview.Builder()
             // We request aspect ratio but no resolution
-                .setTargetAspectRatio(screenAspectRatio)
+                .setTargetAspectRatio(previewAspectRatio)
             // Set initial target rotation
                 .setTargetRotation(rotation)
             .build()
@@ -97,7 +94,7 @@ class CameraFragment : Fragment(R.layout.fragment_camera) {
             .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
             // We request aspect ratio but no resolution to match preview config, but letting
             // CameraX optimize for whatever specific resolution best fits our use cases
-                .setTargetAspectRatio(screenAspectRatio)
+                .setTargetAspectRatio(previewAspectRatio)
             // Set initial target rotation, we will have to call this again if rotation changes
             // during the lifecycle of this use case
                 .setTargetRotation(rotation)
@@ -108,7 +105,7 @@ class CameraFragment : Fragment(R.layout.fragment_camera) {
         // ImageAnalysis
         val imageAnalyzer = ImageAnalysis.Builder()
             // We request aspect ratio but no resolution
-                .setTargetAspectRatio(screenAspectRatio)
+                .setTargetAspectRatio(previewAspectRatio)
             // Set initial target rotation, we will have to call this again if rotation changes
             // during the lifecycle of this use case
                 .setTargetRotation(rotation)
