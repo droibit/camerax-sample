@@ -8,7 +8,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.view.doOnAttach
-import androidx.core.view.isGone
+import androidx.core.view.doOnLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -16,8 +16,6 @@ import androidx.lifecycle.observe
 import androidx.navigation.fragment.findNavController
 import com.github.droibit.sample.camerax.R
 import com.github.droibit.sample.camerax.ui.camera.CameraFragmentDirections.Companion.toGalleryFragment
-import com.github.droibit.sample.camerax.ui.camera.CameraFragmentDirections.Companion.toPermissionsFragment
-import com.github.droibit.sample.camerax.ui.permission.PermissionsFragmentDirections
 import com.github.droibit.sample.camerax.utils.checkCameraPermissionGranted
 import com.github.droibit.sample.camerax.utils.showCameraPermissionErrorToast
 import dagger.hilt.android.AndroidEntryPoint
@@ -33,14 +31,15 @@ private const val RATIO_16_9_VALUE = 16.0 / 9.0
 @AndroidEntryPoint
 class CameraFragment : Fragment(R.layout.fragment_camera) {
 
-    private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-        if (isGranted) {
-            cameraViewModel.requestProcessCameraProvider()
-        } else {
-            showCameraPermissionErrorToast()
-            requireActivity().finish()
+    private val requestPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            if (isGranted) {
+                cameraViewModel.requestProcessCameraProvider()
+            } else {
+                showCameraPermissionErrorToast()
+                requireActivity().finish()
+            }
         }
-    }
 
     private val cameraViewModel: CameraXViewModel by viewModels()
 
@@ -59,7 +58,7 @@ class CameraFragment : Fragment(R.layout.fragment_camera) {
 
         cameraViewModel.processCameraProvider.observe(viewLifecycleOwner) { cameraProvider ->
             if (checkCameraPermissionGranted()) {
-                view_finder.doOnAttach {
+                view_finder.doOnLayout {
                     bindCameraUseCases(cameraProvider)
                 }
             }
@@ -67,7 +66,7 @@ class CameraFragment : Fragment(R.layout.fragment_camera) {
 
         cameraViewModel.takePictureResult.observe(viewLifecycleOwner) { event ->
             event.consume()?.let { result ->
-                when(result) {
+                when (result) {
                     is TakePictureResult.Success -> {
                         showShortToast("The photo was taken.")
                     }
@@ -120,22 +119,22 @@ class CameraFragment : Fragment(R.layout.fragment_camera) {
         val previewAspectRatio = aspectRatio(view_finder.width, view_finder.height)
         Timber.d("Preview aspect ratio: $previewAspectRatio(${view_finder.width} x ${view_finder.height})")
 
-        val rotation = view_finder.display.rotation
+//        val rotation = view_finder.display.rotation
         val preview = Preview.Builder()
             // We request aspect ratio but no resolution
-                .setTargetAspectRatio(previewAspectRatio)
+            .setTargetAspectRatio(previewAspectRatio)
             // Set initial target rotation
-                .setTargetRotation(rotation)
+//            .setTargetRotation(rotation)
             .build()
 
         val imageCapture = ImageCapture.Builder()
             .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
             // We request aspect ratio but no resolution to match preview config, but letting
             // CameraX optimize for whatever specific resolution best fits our use cases
-                .setTargetAspectRatio(previewAspectRatio)
+            .setTargetAspectRatio(previewAspectRatio)
             // Set initial target rotation, we will have to call this again if rotation changes
             // during the lifecycle of this use case
-                .setTargetRotation(rotation)
+//            .setTargetRotation(rotation)
             .build().also {
                 cameraViewModel.setImageCapture(imageCapture = it)
             }
@@ -143,15 +142,16 @@ class CameraFragment : Fragment(R.layout.fragment_camera) {
         // ImageAnalysis
         val imageAnalyzer = ImageAnalysis.Builder()
             // We request aspect ratio but no resolution
-                .setTargetAspectRatio(previewAspectRatio)
+            .setTargetAspectRatio(previewAspectRatio)
             // Set initial target rotation, we will have to call this again if rotation changes
             // during the lifecycle of this use case
-                .setTargetRotation(rotation)
+//            .setTargetRotation(rotation)
             .build()
 
         cameraProvider.unbindAll()
 
-        cameraProvider.bindToLifecycle(this,
+        cameraProvider.bindToLifecycle(
+            this,
             cameraSelector, preview, imageCapture, imageAnalyzer
         )
         preview.setSurfaceProvider(view_finder.createSurfaceProvider())
