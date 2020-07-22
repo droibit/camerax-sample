@@ -23,6 +23,7 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.CancellationException
+import java.util.concurrent.ExecutionException
 import javax.inject.Named
 import kotlin.LazyThreadSafetyMode.NONE
 import kotlin.coroutines.resume
@@ -51,13 +52,26 @@ class CameraXViewModel @ViewModelInject constructor(
 
     private var captureJob: Job? = null
 
+    private val cameraProviderLiveData = MutableLiveData<ProcessCameraProvider>()
     val processCameraProvider: LiveData<ProcessCameraProvider> by lazy(NONE) {
-        val cameraProviderLiveData = MutableLiveData<ProcessCameraProvider>()
-
-        viewModelScope.launch {
-            cameraProviderLiveData.value = ProcessCameraProvider(getApplication())
-        }
+        requestProcessCameraProvider()
         cameraProviderLiveData
+    }
+
+    @UiThread
+    fun requestProcessCameraProvider() {
+        val processCameraProvider = cameraProviderLiveData.value
+        if (processCameraProvider != null) {
+            cameraProviderLiveData.value = processCameraProvider
+        }
+        viewModelScope.launch {
+            try {
+                cameraProviderLiveData.value = ProcessCameraProvider(getApplication())
+            } catch (e: Exception) {
+                Timber.e(e)
+            }
+        }
+
     }
 
     @UiThread
@@ -130,32 +144,33 @@ class CameraXViewModel @ViewModelInject constructor(
         val photos = outputDirectory.listFiles { file: File ->
             file.isFile && file.extension.equals("jpg", ignoreCase = false)
         }?.map { Uri.fromFile(it) } ?: emptyList()
-        navigateToGalleryLiveData.value = Event(photos)
+        navigateToGalleryLiveData.value = Event(photos.reversed())
     }
 }
 
 @Suppress("FunctionName")
 private suspend fun ProcessCameraProvider(context: Context): ProcessCameraProvider {
     return suspendCancellableCoroutine { cont ->
+        Timber.d("ProcessCameraProvider: Start..")
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
         cameraProviderFuture.addListener(Runnable {
             try {
-                if (cameraProviderFuture.isCancelled) {
-                    cont.cancel()
-                } else {
-                    cont.resume(cameraProviderFuture.get())
-                }
+                cont.resume(cameraProviderFuture.get())
             } catch (e: Exception) {
-                if (e is InterruptedException || e is CancellationException) {
-                    cont.cancel(e)
-                } else {
-                    cont.resumeWithException(e)
+                when (e) {
+                    is InterruptedException, is CancellationException -> cont.cancel(e)
+                    is ExecutionException -> cont.resumeWithException(e.cause ?: e)
+                    else -> cont.resumeWithException(e)
                 }
+            } finally {
+                Timber.d("ProcessCameraProvider: End..")
             }
         }, ContextCompat.getMainExecutor(context))
 
         cont.invokeOnCancellation {
-            cameraProviderFuture.cancel(false)
+            // Don't cancel the Future.
+//            cameraProviderFuture.cancel(false)
+            Timber.d("ProcessCameraProvider: canceled($it)")
         }
     }
 }

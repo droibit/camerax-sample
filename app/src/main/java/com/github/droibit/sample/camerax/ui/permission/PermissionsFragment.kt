@@ -1,7 +1,6 @@
 package com.github.droibit.sample.camerax.ui.permission
 
 import android.Manifest
-import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -11,20 +10,20 @@ import android.widget.FrameLayout
 import android.widget.FrameLayout.LayoutParams.MATCH_PARENT
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import com.github.droibit.sample.camerax.R
 import com.github.droibit.sample.camerax.ui.permission.PermissionsFragmentDirections.Companion.toCameraFragment
+import com.github.droibit.sample.camerax.utils.checkCameraPermissionGranted
+import com.github.droibit.sample.camerax.utils.showCameraPermissionErrorToast
 
 class PermissionsFragment : Fragment() {
 
     private val requestPermissionLauncher = registerForActivityResult(RequestPermission()) { isGranted ->
         if (isGranted) {
-            // TODO:
+            findNavController().navigate(toCameraFragment())
         } else {
-            showErrorToast()
+            showCameraPermissionErrorToast()
             requireActivity().finish()
         }
     }
@@ -41,13 +40,6 @@ class PermissionsFragment : Fragment() {
         }
     }
 
-    private fun checkCameraPermissionGranted(): Boolean {
-        return ContextCompat.checkSelfPermission(
-            requireContext(),
-            Manifest.permission.CAMERA
-        ) == PackageManager.PERMISSION_GRANTED
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -57,9 +49,5 @@ class PermissionsFragment : Fragment() {
             layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT)
             setBackgroundColor(Color.WHITE)
         }
-    }
-
-    private fun showErrorToast() {
-        Toast.makeText(requireContext(), "Grant the camera permission.", Toast.LENGTH_SHORT).show()
     }
 }

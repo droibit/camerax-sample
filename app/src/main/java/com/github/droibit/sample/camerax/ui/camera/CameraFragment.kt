@@ -1,16 +1,25 @@
 package com.github.droibit.sample.camerax.ui.camera
 
+import android.Manifest
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.core.view.doOnAttach
+import androidx.core.view.isGone
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.observe
 import androidx.navigation.fragment.findNavController
 import com.github.droibit.sample.camerax.R
 import com.github.droibit.sample.camerax.ui.camera.CameraFragmentDirections.Companion.toGalleryFragment
+import com.github.droibit.sample.camerax.ui.camera.CameraFragmentDirections.Companion.toPermissionsFragment
+import com.github.droibit.sample.camerax.ui.permission.PermissionsFragmentDirections
+import com.github.droibit.sample.camerax.utils.checkCameraPermissionGranted
+import com.github.droibit.sample.camerax.utils.showCameraPermissionErrorToast
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_camera.*
 import timber.log.Timber
@@ -24,13 +33,36 @@ private const val RATIO_16_9_VALUE = 16.0 / 9.0
 @AndroidEntryPoint
 class CameraFragment : Fragment(R.layout.fragment_camera) {
 
+    private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+        if (isGranted) {
+            cameraViewModel.requestProcessCameraProvider()
+        } else {
+            showCameraPermissionErrorToast()
+            requireActivity().finish()
+        }
+    }
+
     private val cameraViewModel: CameraXViewModel by viewModels()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        lifecycleScope.launchWhenCreated {
+            if (!checkCameraPermissionGranted()) {
+                requestPermissionLauncher.launch(Manifest.permission.CAMERA)
+            }
+        }
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         cameraViewModel.processCameraProvider.observe(viewLifecycleOwner) { cameraProvider ->
-            bindCameraUseCases(cameraProvider)
+            if (checkCameraPermissionGranted()) {
+                view_finder.doOnAttach {
+                    bindCameraUseCases(cameraProvider)
+                }
+            }
         }
 
         cameraViewModel.takePictureResult.observe(viewLifecycleOwner) { event ->
@@ -63,6 +95,12 @@ class CameraFragment : Fragment(R.layout.fragment_camera) {
         gallery_button.setOnClickListener {
             cameraViewModel.onGalleryButtonClick()
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // Older devices like the Nexus 5 will destroy Fragment when you go back to home.
+        Timber.d("Destroyed")
     }
 
     private fun showShortToast(message: String) {
