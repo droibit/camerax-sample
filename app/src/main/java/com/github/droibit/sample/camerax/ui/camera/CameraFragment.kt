@@ -1,13 +1,15 @@
 package com.github.droibit.sample.camerax.ui.camera
 
 import android.Manifest
+import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.view.View
+import android.widget.ImageButton
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.core.view.doOnAttach
+import androidx.camera.view.PreviewView
 import androidx.core.view.doOnLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -46,7 +48,7 @@ class CameraFragment : Fragment(R.layout.fragment_camera) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        lifecycleScope.launchWhenCreated {
+        lifecycleScope.launchWhenStarted {
             if (!checkCameraPermissionGranted()) {
                 requestPermissionLauncher.launch(Manifest.permission.CAMERA)
             }
@@ -93,6 +95,26 @@ class CameraFragment : Fragment(R.layout.fragment_camera) {
 
         gallery_button.setOnClickListener {
             cameraViewModel.onGalleryButtonClick()
+        }
+
+        play_and_pause_button.setOnClickListener {
+            play_and_pause_button.previewEnabled = !play_and_pause_button.previewEnabled
+
+            val cameraProvider = cameraViewModel.processCameraProvider.value
+            if (play_and_pause_button.previewEnabled) {
+                Timber.d("Preview enabled.")
+                cameraProvider?.let { bindCameraUseCases(it) }
+            } else {
+                Timber.d("Preview disabled.")
+
+                view_finder.bitmap?.let {
+                    (view_finder.background as? BitmapDrawable)?.let { drawable ->
+                        drawable.bitmap?.recycle()
+                    }
+                    view_finder.background = BitmapDrawable(resources, it)
+                }
+                cameraProvider?.unbindAll()
+            }
         }
     }
 
@@ -154,6 +176,9 @@ class CameraFragment : Fragment(R.layout.fragment_camera) {
             this,
             cameraSelector, preview, imageCapture, imageAnalyzer
         )
+
+        // ref. https://medium.com/androiddevelopers/display-a-camera-preview-with-previewview-86562433d86c
+        view_finder.preferredImplementationMode = PreviewView.ImplementationMode.SURFACE_VIEW
         preview.setSurfaceProvider(view_finder.createSurfaceProvider())
     }
 }
@@ -176,3 +201,9 @@ private fun aspectRatio(width: Int, height: Int): Int {
     }
     return AspectRatio.RATIO_16_9
 }
+
+private var ImageButton.previewEnabled: Boolean
+    get() = !this.isSelected
+    set(value) {
+        this.isSelected = !value
+    }
