@@ -46,19 +46,19 @@ dependencies {
   val coroutinesVersion = "1.3.7"
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion")
 
-  implementation("androidx.core:core-ktx:1.3.0")
-  implementation("androidx.fragment:fragment-ktx:1.3.0-alpha06")
+  implementation("androidx.core:core-ktx:1.3.1")
+  implementation("androidx.fragment:fragment-ktx:1.3.0-alpha07")
   implementation("androidx.appcompat:appcompat:1.1.0")
   implementation("androidx.constraintlayout:constraintlayout:1.1.3")
   implementation("androidx.viewpager2:viewpager2:1.0.0")
 
-  val cameraxVersion = "1.0.0-beta06"
+  val cameraxVersion = "1.0.0-beta07"
   implementation("androidx.camera:camera-core:$cameraxVersion")
   implementation("androidx.camera:camera-camera2:$cameraxVersion")
   implementation("androidx.camera:camera-lifecycle:$cameraxVersion")
-  implementation("androidx.camera:camera-view:1.0.0-alpha13")
+  implementation("androidx.camera:camera-view:1.0.0-alpha14")
 
-  val lifecycleVersion = "2.3.0-alpha05"
+  val lifecycleVersion = "2.3.0-alpha06"
   implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
   implementation("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion")
 
@@ -69,7 +69,7 @@ dependencies {
   implementation("com.google.dagger:hilt-android:$daggerVersion")
   kapt("com.google.dagger:hilt-android-compiler:$daggerVersion")
 
-  val hiltVersion = "1.0.0-alpha01"
+  val hiltVersion = "1.0.0-alpha02"
   implementation("androidx.hilt:hilt-lifecycle-viewmodel:$hiltVersion")
   kapt("androidx.hilt:hilt-compiler:$hiltVersion")
 
