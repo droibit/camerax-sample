@@ -14,6 +14,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.github.droibit.sample.camerax.utils.Event
+import com.google.common.util.concurrent.ListenableFuture
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -60,10 +61,6 @@ class CameraXViewModel @ViewModelInject constructor(
 
     @UiThread
     fun requestProcessCameraProvider() {
-        val processCameraProvider = cameraProviderLiveData.value
-        if (processCameraProvider != null) {
-            cameraProviderLiveData.value = processCameraProvider
-        }
         viewModelScope.launch {
             try {
                 cameraProviderLiveData.value = ProcessCameraProvider(getApplication())
@@ -71,7 +68,6 @@ class CameraXViewModel @ViewModelInject constructor(
                 Timber.e(e)
             }
         }
-
     }
 
     @UiThread
@@ -150,20 +146,20 @@ class CameraXViewModel @ViewModelInject constructor(
 
 @Suppress("FunctionName")
 private suspend fun ProcessCameraProvider(context: Context): ProcessCameraProvider {
+    val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
+    if (cameraProviderFuture.isDone) {
+        return cameraProviderFuture.getValue()
+    }
+
     return suspendCancellableCoroutine { cont ->
-        Timber.d("ProcessCameraProvider: Start..")
-        val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
         cameraProviderFuture.addListener(Runnable {
             try {
-                cont.resume(cameraProviderFuture.get())
+                cont.resume(cameraProviderFuture.getValue())
             } catch (e: Exception) {
                 when (e) {
-                    is InterruptedException, is CancellationException -> cont.cancel(e)
-                    is ExecutionException -> cont.resumeWithException(e.cause ?: e)
+                    is CancellationException -> cont.cancel(e)
                     else -> cont.resumeWithException(e)
                 }
-            } finally {
-                Timber.d("ProcessCameraProvider: End..")
             }
         }, ContextCompat.getMainExecutor(context))
 
@@ -172,5 +168,17 @@ private suspend fun ProcessCameraProvider(context: Context): ProcessCameraProvid
 //            cameraProviderFuture.cancel(false)
             Timber.d("ProcessCameraProvider: canceled($it)")
         }
+    }
+}
+
+private fun <T> ListenableFuture<T>.getValue(): T {
+    return try {
+        get()
+    } catch (e: InterruptedException) {
+        throw CancellationException(e.message)
+    } catch (e: ExecutionException) {
+        throw requireNotNull(e.cause)
+    } catch (e: CancellationException) {
+        throw e
     }
 }
