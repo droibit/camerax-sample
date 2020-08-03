@@ -60,10 +60,6 @@ class CameraXViewModel @ViewModelInject constructor(
 
     @UiThread
     fun requestProcessCameraProvider() {
-        val processCameraProvider = cameraProviderLiveData.value
-        if (processCameraProvider != null) {
-            cameraProviderLiveData.value = processCameraProvider
-        }
         viewModelScope.launch {
             try {
                 cameraProviderLiveData.value = ProcessCameraProvider(getApplication())
@@ -71,7 +67,6 @@ class CameraXViewModel @ViewModelInject constructor(
                 Timber.e(e)
             }
         }
-
     }
 
     @UiThread
