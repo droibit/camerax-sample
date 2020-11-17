@@ -14,7 +14,6 @@ import androidx.core.view.doOnLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.observe
 import androidx.navigation.fragment.findNavController
 import com.github.droibit.sample.camerax.R
 import com.github.droibit.sample.camerax.ui.camera.CameraFragmentDirections.Companion.toGalleryFragment
@@ -178,8 +177,8 @@ class CameraFragment : Fragment(R.layout.fragment_camera) {
         )
 
         // ref. https://medium.com/androiddevelopers/display-a-camera-preview-with-previewview-86562433d86c
-        view_finder.preferredImplementationMode = PreviewView.ImplementationMode.SURFACE_VIEW
-        preview.setSurfaceProvider(view_finder.createSurfaceProvider())
+        view_finder.implementationMode = PreviewView.ImplementationMode.PERFORMANCE
+        preview.setSurfaceProvider(view_finder.surfaceProvider)
     }
 }
 

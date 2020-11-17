@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.ir.backend.js.compile
-
 plugins {
   id("com.android.application")
   kotlin("android")
@@ -46,19 +44,19 @@ dependencies {
   val coroutinesVersion = "1.3.7"
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion")
 
-  implementation("androidx.core:core-ktx:1.3.1")
-  implementation("androidx.fragment:fragment-ktx:1.3.0-alpha07")
-  implementation("androidx.appcompat:appcompat:1.1.0")
-  implementation("androidx.constraintlayout:constraintlayout:1.1.3")
+  implementation("androidx.core:core-ktx:1.3.2")
+  implementation("androidx.fragment:fragment-ktx:1.3.0-beta01")
+  implementation("androidx.appcompat:appcompat:1.2.0")
+  implementation("androidx.constraintlayout:constraintlayout:2.0.4")
   implementation("androidx.viewpager2:viewpager2:1.0.0")
 
-  val cameraxVersion = "1.0.0-beta07"
+  val cameraxVersion = "1.0.0-beta12"
   implementation("androidx.camera:camera-core:$cameraxVersion")
   implementation("androidx.camera:camera-camera2:$cameraxVersion")
   implementation("androidx.camera:camera-lifecycle:$cameraxVersion")
-  implementation("androidx.camera:camera-view:1.0.0-alpha14")
+  implementation("androidx.camera:camera-view:1.0.0-alpha19")
 
-  val lifecycleVersion = "2.3.0-alpha06"
+  val lifecycleVersion = "2.3.0-beta01"
   implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
   implementation("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion")
 
@@ -73,13 +71,13 @@ dependencies {
   implementation("androidx.hilt:hilt-lifecycle-viewmodel:$hiltVersion")
   kapt("androidx.hilt:hilt-compiler:$hiltVersion")
 
-  implementation("io.coil-kt:coil:0.11.0")
+  implementation("io.coil-kt:coil:1.0.0")
 
   implementation("com.jakewharton.timber:timber:4.7.1")
 
-  testImplementation("junit:junit:4.13")
-  androidTestImplementation("androidx.test.ext:junit:1.1.1")
-  androidTestImplementation("androidx.test.espresso:espresso-core:3.2.0")
+  testImplementation("junit:junit:4.13.1")
+  androidTestImplementation("androidx.test.ext:junit:1.1.2")
+  androidTestImplementation("androidx.test.espresso:espresso-core:3.3.0")
 }
 
 kapt {

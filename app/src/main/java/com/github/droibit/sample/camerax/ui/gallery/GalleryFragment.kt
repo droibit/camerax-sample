@@ -11,7 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
-import coil.api.load
+import coil.load
 import coil.size.Scale
 import com.github.droibit.sample.camerax.R
 import kotlinx.android.synthetic.main.fragment_gallery.*
