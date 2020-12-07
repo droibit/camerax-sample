@@ -27,19 +27,7 @@ class PermissionsFragment : Fragment() {
             requireActivity().finish()
         }
     }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        lifecycleScope.launchWhenCreated {
-            if (checkCameraPermissionGranted()) {
-                findNavController().navigate(toCameraFragment())
-            } else {
-                requestPermissionLauncher.launch(Manifest.permission.CAMERA)
-            }
-        }
-    }
-
+    
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -48,6 +36,18 @@ class PermissionsFragment : Fragment() {
         return FrameLayout(requireContext()).apply {
             layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT)
             setBackgroundColor(Color.WHITE)
+        }
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        lifecycleScope.launchWhenCreated {
+            if (checkCameraPermissionGranted()) {
+                findNavController().navigate(toCameraFragment())
+            } else {
+                requestPermissionLauncher.launch(Manifest.permission.CAMERA)
+            }
         }
     }
 }

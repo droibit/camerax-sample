@@ -45,7 +45,7 @@ dependencies {
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion")
 
   implementation("androidx.core:core-ktx:1.3.2")
-  implementation("androidx.fragment:fragment-ktx:1.3.0-beta01")
+  implementation("androidx.fragment:fragment-ktx:1.3.0-beta02")
   implementation("androidx.appcompat:appcompat:1.2.0")
   implementation("androidx.constraintlayout:constraintlayout:2.0.4")
   implementation("androidx.viewpager2:viewpager2:1.0.0")
@@ -71,7 +71,7 @@ dependencies {
   implementation("androidx.hilt:hilt-lifecycle-viewmodel:$hiltVersion")
   kapt("androidx.hilt:hilt-compiler:$hiltVersion")
 
-  implementation("io.coil-kt:coil:1.0.0")
+  implementation("io.coil-kt:coil:1.1.0")
 
   implementation("com.jakewharton.timber:timber:4.7.1")
 
