@@ -1,8 +1,8 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
   val kotlinVersion by extra("1.4.21")
-  val daggerVersion by extra("2.30.1-alpha")
-  val navigationVersion by extra("2.3.2")
+  val daggerVersion by extra("2.31.2-alpha")
+  val navigationVersion by extra("2.3.3")
 
   repositories {
     google()

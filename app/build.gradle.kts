@@ -45,18 +45,18 @@ dependencies {
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion")
 
   implementation("androidx.core:core-ktx:1.3.2")
-  implementation("androidx.fragment:fragment-ktx:1.3.0-rc01")
+  implementation("androidx.fragment:fragment-ktx:1.3.0")
   implementation("androidx.appcompat:appcompat:1.2.0")
   implementation("androidx.constraintlayout:constraintlayout:2.0.4")
   implementation("androidx.viewpager2:viewpager2:1.0.0")
 
-  val cameraxVersion = "1.0.0-rc01"
+  val cameraxVersion = "1.0.0-rc03"
   implementation("androidx.camera:camera-core:$cameraxVersion")
   implementation("androidx.camera:camera-camera2:$cameraxVersion")
   implementation("androidx.camera:camera-lifecycle:$cameraxVersion")
-  implementation("androidx.camera:camera-view:1.0.0-alpha20")
+  implementation("androidx.camera:camera-view:1.0.0-alpha22")
 
-  val lifecycleVersion = "2.3.0-rc01"
+  val lifecycleVersion = "2.3.0"
   implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
   implementation("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion")
 
@@ -71,11 +71,11 @@ dependencies {
   implementation("androidx.hilt:hilt-lifecycle-viewmodel:$hiltVersion")
   kapt("androidx.hilt:hilt-compiler:$hiltVersion")
 
-  implementation("io.coil-kt:coil:1.1.0")
+  implementation("io.coil-kt:coil:1.1.1")
 
   implementation("com.jakewharton.timber:timber:4.7.1")
 
-  testImplementation("junit:junit:4.13.1")
+  testImplementation("junit:junit:4.13.2")
   androidTestImplementation("androidx.test.ext:junit:1.1.2")
   androidTestImplementation("androidx.test.espresso:espresso-core:3.3.0")
 }
